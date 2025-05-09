@@ -1,5 +1,6 @@
 package com.Controller;
 
+import com.DTO.Request.LoginRequest;
 import com.Entity.UserEntity;
 import com.Repository.UserRepository;
 import com.Service.UserService;
@@ -10,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/user")
@@ -54,4 +55,13 @@ public class UserController {
         }
     }
 
+    @PostMapping("/loginUser")
+    public ResponseEntity<String> loginUser(@RequestBody LoginRequest loginRequest){
+        Boolean isValid = userService.verifyEmailAndPassword(loginRequest);
+        if (isValid) {
+            return ResponseEntity.ok("Login successful");
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password");
+        }
+    }
 }

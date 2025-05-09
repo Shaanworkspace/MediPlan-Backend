@@ -21,7 +21,7 @@ public class UserEntity {
     private String firstName;
     private String lastName;
 
-    @Email @NotNull
+    @Email @NotNull @Column(unique = true)
     private String email;
 
     @NotNull
