@@ -11,10 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-@CrossOrigin(origins = "http://localhost:5173")
+
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/user")
+@RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:5173")
 public class UserController {
     private final UserService userService;
 
@@ -54,9 +55,9 @@ public class UserController {
                     .build();
         }
     }
-
+    @CrossOrigin(origins = "http://localhost:5173")
     @PostMapping("/loginUser")
-    public ResponseEntity<String> loginUser(@RequestBody LoginRequest loginRequest){
+    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest){
         Boolean isValid = userService.verifyEmailAndPassword(loginRequest);
         if (isValid) {
             return ResponseEntity.ok("Login successful");
