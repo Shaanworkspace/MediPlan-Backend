@@ -2,8 +2,11 @@ package com.Service;
 
 import com.DTO.Request.LoginRequest;
 import com.Entity.UserEntity;
-import com.Repository.UserRepository;
+import com.Repository.UserEntityRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,24 +14,24 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
-    private final UserRepository userRepository;
+public class UserService implements UserDetailsService {
+    private final UserEntityRepository userEntityRepository;
 
     public List<UserEntity> getAllUsers() {
-        return userRepository.findAll();
+        return userEntityRepository.findAll();
     }
 
     public UserEntity addUser(UserEntity userEntity){
-        return userRepository.save(userEntity);
+        return userEntityRepository.save(userEntity);
     }
 
     public List<UserEntity> addAllUsers(List<UserEntity> userEntities) {
-        return userRepository.saveAll(userEntities);
+        return userEntityRepository.saveAll(userEntities);
     }
 
     public Boolean verifyEmailAndPassword(LoginRequest loginRequest){
         try {
-            Optional<UserEntity> userByEmail = userRepository.findByEmail(loginRequest.getEmail());
+            Optional<UserEntity> userByEmail = userEntityRepository.findByEmail(loginRequest.getEmail());
 
             if (userByEmail.isEmpty()) {
                 return false; // Email not found
@@ -49,4 +52,8 @@ public class UserService {
         }
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userEntityRepository.findByEmail(username).orElseThrow(()->new UsernameNotFoundException("Email not found" + username));
+    }
 }

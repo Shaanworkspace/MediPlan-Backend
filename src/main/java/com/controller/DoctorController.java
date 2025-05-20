@@ -1,13 +1,11 @@
-package com.Controller;
+package com.controller;
 
 import com.Entity.DoctorEntity;
-import com.Entity.UserEntity;
 import com.Repository.DoctorRepository;
 import com.Service.DoctorService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

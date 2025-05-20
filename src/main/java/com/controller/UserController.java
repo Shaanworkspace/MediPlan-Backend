@@ -1,8 +1,7 @@
-package com.Controller;
+package com.controller;
 
 import com.DTO.Request.LoginRequest;
 import com.Entity.UserEntity;
-import com.Repository.UserRepository;
 import com.Service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
