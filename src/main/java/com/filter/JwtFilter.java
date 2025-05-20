@@ -1,3 +1,4 @@
+
 package com.filter;
 
 import com.Service.JWTService;
@@ -27,34 +28,45 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
+        String requestURI = request.getRequestURI();
+
+        // Skip JWT validation for public endpoints
+        if (requestURI.startsWith("/api/auth/login") || requestURI.startsWith("/api/auth/register")) {
+            System.out.println("Skipping JWT filter for: " + requestURI); // Debug log
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String authHeader = request.getHeader("Authorization");
 
-        // ✅ FIX: This condition should be OR with NOT null check
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7); // Remove "Bearer "
 
-            if (jwtService.validateToken(token)) {
-                String username = jwtService.getUsernameFromToken(token);
+            try {
+                if (jwtService.validateToken(token)) {
+                    String username = jwtService.getUsernameFromToken(token);
+                    UserDetails userDetails = userService.loadUserByUsername(username);
 
-                UserDetails userDetails = userService.loadUserByUsername(username);
+                    UsernamePasswordAuthenticationToken authenticationToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
 
-                UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
+                    authenticationToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
 
-                authenticationToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                }
+            } catch (Exception e) {
+                System.out.println("JWT validation failed: " + e.getMessage()); // Debug log
             }
+        } else {
+            System.out.println("No valid Bearer token found in Authorization header"); // Debug log
         }
 
-        // ✅ Always forward the request
         filterChain.doFilter(request, response);
     }
 }

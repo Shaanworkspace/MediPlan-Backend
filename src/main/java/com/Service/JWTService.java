@@ -38,7 +38,6 @@ public class JWTService {
                     .verifyWith(getSignKey())
                     .build()
                     .parseSignedClaims(token);
-
             return true;
         } catch (Exception e) {
             return false;
