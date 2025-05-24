@@ -3,6 +3,7 @@ package com.Service;
 import com.DTO.Request.LoginRequest;
 import com.Entity.UserEntity;
 import com.Repository.UserEntityRepository;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,6 +16,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
+    @NotNull
     private final UserEntityRepository userEntityRepository;
 
     public List<UserEntity> getAllUsers() {
