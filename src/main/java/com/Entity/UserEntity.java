@@ -31,7 +31,7 @@ public class UserEntity implements UserDetails {
 
     @NotNull
     private String password;
-
+    private String passwordWithoutEncryption;
     private String phone;
     private String company;
     private LocalDate dob;
@@ -58,7 +58,7 @@ public class UserEntity implements UserDetails {
     @Column(nullable = false)
     private boolean accountNonLocked = true;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER,orphanRemoval = true)
     private List<UserRoles> roles;
 
     @Override

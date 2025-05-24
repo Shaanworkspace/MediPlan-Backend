@@ -1,7 +1,10 @@
 package com.controller;
 
+import com.DTO.Request.RegisterRequest;
+import com.DTO.Response.AuthResponse;
 import com.Entity.UserEntity;
 import com.Entity.UserRoles;
+import com.Repository.UserEntityRepository;
 import com.enums.Role;
 import com.Service.AuthenticationService;
 import com.Service.UserService;
@@ -13,6 +16,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +31,7 @@ public class AuthController {
     private final UserService userService;
     private final AuthenticationService authenticationService;
     private final PasswordEncoder passwordEncoder;
+    private final UserEntityRepository userEntityRepository;
 
 
     @PostMapping("/register")
@@ -47,6 +52,7 @@ public class AuthController {
                 // Create new user
                 UserEntity user = new UserEntity();
                 user.setEmail(registerRequest.getEmail());
+                user.setPasswordWithoutEncryption(registerRequest.getPassword());
                 user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
                 user.setFirstName(registerRequest.getFirstName());
                 user.setLastName(registerRequest.getLastName());
@@ -57,10 +63,24 @@ public class AuthController {
                 user.setCredentialsNonExpired(true);
                 user.setAccountNonLocked(true);
 
-                // Assign role
+                // Assign role userRole ( need user and its role ) for user
                 UserRoles userRole = new UserRoles();
                 userRole.setUser(user);
-                userRole.setRole(Role.PATIENT);
+                String role1 = registerRequest.getRole();
+                if(role1.isEmpty()){
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(new AuthResponse(null, null, null, "Please fill the Role "));
+                }
+                try{
+                    Role role = Role.valueOf(role1.toUpperCase());
+                    userRole.setRole(role);
+                }catch (IllegalArgumentException e1){
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                            .body(new AuthResponse(null, null, null, "Invalid role: " + role1));
+
+                }
+
+                // Saving a list of user Role in user
                 user.setRoles(List.of(userRole));
 
                 // Save user
@@ -68,15 +88,14 @@ public class AuthController {
 
                 // Generate token
                 String token = authenticationService.verify(registerRequest.getEmail(), registerRequest.getPassword());
-                return ResponseEntity.ok(new AuthResponse(token, user.getEmail(), List.of(Role.PATIENT.name())));
+                return ResponseEntity.ok(new AuthResponse(token, user.getEmail(), List.of(userRole.getRole().name()),"Done"));
             } catch (Exception ex) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(new AuthResponse(null, null, null, "Registration failed: " + ex.getMessage()));
             }
         }
     }
-
-
+    
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody RegisterRequest loginRequest) {
         try {
@@ -84,8 +103,17 @@ public class AuthController {
                     loginRequest.getEmail(),
                     loginRequest.getPassword()
             );
+
+            UserDetails user = userService.loadUserByUsername(loginRequest.getEmail());
+            //Now we need to fetch the roles of user so that we can divert to respective pages
+            //we can typecast this in userEntity as it implements UserDetails
+            UserEntity user1 = (UserEntity) user;
+            List<String> roles = user1.getRoles().stream()
+                    .map(userRole -> userRole.getRole().name())
+                    .toList();
+
             return ResponseEntity.ok(
-                    new AuthResponse(token, loginRequest.getEmail(), List.of(Role.PATIENT.name()))
+                    new AuthResponse(token, loginRequest.getEmail(), roles,"Created , No error")
             );
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -95,47 +123,4 @@ public class AuthController {
 
 }
 
-@Data
-class AuthResponse {
-    private String token;
-    private String username;
-    private List<String> roles;
-    private String error;
 
-    public AuthResponse(String token, String username, List<String> roles) {
-        this.token = token;
-        this.username = username;
-        this.roles = roles;
-    }
-
-    public AuthResponse(String token, String username, List<String> roles, String error) {
-        this.token = token;
-        this.username = username;
-        this.roles = roles;
-        this.error = error;
-    }
-
-}
-
-@Data
-class RegisterRequest {
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
-    private String email;
-
-    @NotBlank(message = "Password is required")
-    @Size(min = 6, message = "Password must be at least 6 characters")
-    private String password;
-
-    @NotBlank(message = "Confirm password is required")
-    private String confirmPassword;
-
-    @NotBlank(message = "First name is required")
-    private String firstName;
-
-    @NotBlank(message = "Last name is required")
-    private String lastName;
-
-    private String phone;
-    private String company;
-}
