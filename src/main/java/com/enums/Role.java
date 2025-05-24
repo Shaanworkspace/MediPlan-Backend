@@ -1,4 +1,4 @@
-package com.Entity;
+package com.enums;
 
 public enum Role {
     CARE_GIVER,

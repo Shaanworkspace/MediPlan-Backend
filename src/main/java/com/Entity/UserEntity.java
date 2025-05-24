@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 @Entity
 @Data
+
 public class UserEntity implements UserDetails {
 
     @Id
@@ -95,5 +96,12 @@ public class UserEntity implements UserDetails {
     @Override
     public boolean isEnabled() {
         return enabled;
+    }
+    @Override
+    public String toString() {
+        return "UserEntity{" +
+                "username='" + email + '\'' +
+                // Avoid printing roles here if it causes recursion
+                '}';
     }
 }

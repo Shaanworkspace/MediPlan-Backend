@@ -1,5 +1,6 @@
 package com.Entity;
 
+import com.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 

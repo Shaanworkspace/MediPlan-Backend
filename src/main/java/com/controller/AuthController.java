@@ -5,7 +5,7 @@ import com.DTO.Response.AuthResponse;
 import com.Entity.UserEntity;
 import com.Entity.UserRoles;
 import com.Repository.UserEntityRepository;
-import com.Entity.Role;
+import com.enums.Role;
 import com.Service.AuthenticationService;
 import com.Service.UserService;
 import jakarta.validation.Valid;
