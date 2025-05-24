@@ -1,5 +1,6 @@
 package com.controller;
 
+import com.DTO.Request.LoginRequest;
 import com.DTO.Request.RegisterRequest;
 import com.DTO.Response.AuthResponse;
 import com.Entity.UserEntity;
@@ -93,7 +94,7 @@ public class AuthController {
     }
     
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody RegisterRequest loginRequest) {
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest) {
         try {
             String token = authenticationService.verify(
                     loginRequest.getEmail(),
