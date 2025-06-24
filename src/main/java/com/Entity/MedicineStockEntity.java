@@ -26,9 +26,9 @@ public class MedicineStockEntity {
 
     private boolean autoBuy; // Automatically reorder when low
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user;
+//    @ManyToOne
+//    @JoinColumn(name = "user_id", nullable = false)
+//    private UserEntity user;
 
     @UpdateTimestamp
     private LocalDate lastUpdated;

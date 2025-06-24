@@ -2,6 +2,7 @@ package com.Service;
 
 import com.DTO.Request.LoginRequest;
 import com.Entity.UserEntity;
+import com.Entity.UserRoles;
 import com.Repository.UserEntityRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +25,11 @@ public class UserService implements UserDetailsService {
     }
 
     public UserEntity addUser(UserEntity userEntity){
+        if (userEntity.getRoles() != null) {
+            for (UserRoles role : userEntity.getRoles()) {
+                role.setUser(userEntity); // 👈 VERY IMPORTANT!
+            }
+        }
         return userEntityRepository.save(userEntity);
     }
 
@@ -33,16 +39,14 @@ public class UserService implements UserDetailsService {
 
     public Boolean verifyEmailAndPassword(LoginRequest loginRequest){
         try {
-            Optional<UserEntity> userByEmail = userEntityRepository.findByEmail(loginRequest.getEmail());
+            UserEntity userByEmail = userEntityRepository.findByEmail(loginRequest.getEmail());
 
-            if (userByEmail.isEmpty()) {
+            if (userByEmail==null) {
                 return false; // Email not found
             }
 
-            UserEntity user = userByEmail.get();
-
             // TODO: Use BCryptPasswordEncoder in real-world apps instead of plain-text
-            if (!user.getPassword().equals(loginRequest.getPassword())) {
+            if (!userByEmail.getPassword().equals(loginRequest.getPassword())) {
                 return false; // Password does not match
             }
 
@@ -56,6 +60,10 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userEntityRepository.findByEmail(username).orElseThrow(()->new UsernameNotFoundException("Email not found" + username));
+        UserEntity byEmail = userEntityRepository.findByEmail(username);
+        if(byEmail == null) {
+            throw new UsernameNotFoundException("Can't Get Username");
+        };
+        return byEmail;
     }
 }

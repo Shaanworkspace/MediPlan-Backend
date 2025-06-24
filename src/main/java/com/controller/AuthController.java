@@ -36,14 +36,14 @@ public class AuthController {
         try {
             userService.loadUserByUsername(registerRequest.getEmail());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new AuthResponse(null, null, null, "User already exists"));
+                    .body(new AuthResponse(null, null, null, null, null, "User already exists"));
         } catch (UsernameNotFoundException e) {
             try {
 
                 // Validate confirmPassword
                 if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body(new AuthResponse(null, null, null, "Passwords do not match with confirm password"));
+                            .body(new AuthResponse(null, null, null, null, null, "Passwords do not match with confirm password"));
                 }
 
                 // Create new user
@@ -66,14 +66,14 @@ public class AuthController {
                 String role1 = registerRequest.getRole();
                 if(role1.isEmpty()){
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body(new AuthResponse(null, null, null, "Please fill the Role "));
+                            .body(new AuthResponse(null, null, null, null, null, "Please fill the Role "));
                 }
                 try{
                     Role role = Role.valueOf(role1.toUpperCase());
                     userRole.setRole(role);
                 }catch (IllegalArgumentException e1){
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                            .body(new AuthResponse(null, null, null, "Invalid role: " + role1));
+                            .body(new AuthResponse(null, null, null, null, null, "Invalid role: " + role1));
 
                 }
 
@@ -85,10 +85,10 @@ public class AuthController {
 
                 // Generate token
                 String token = authenticationService.verify(registerRequest.getEmail(), registerRequest.getPassword());
-                return ResponseEntity.ok(new AuthResponse(token, user.getEmail(), List.of(userRole.getRole().name()),"Done"));
+                return ResponseEntity.ok(new AuthResponse(token, user.getEmail(),user.getFirstName(),user.getLastName(), List.of(userRole.getRole().name()),"Done"));
             } catch (Exception ex) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(new AuthResponse(null, null, null, "Registration failed: " + ex.getMessage()));
+                        .body(new AuthResponse(null, null, null, null, null, "Registration failed: " + ex.getMessage()));
             }
         }
     }
@@ -110,11 +110,11 @@ public class AuthController {
                     .toList();
 
             return ResponseEntity.ok(
-                    new AuthResponse(token, loginRequest.getEmail(), roles,"Created , No error")
+                    new AuthResponse(token, loginRequest.getEmail(),user1.getFirstName() , user1.getLastName(), roles,"Created , No error")
             );
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new AuthResponse(null, null, null, "Invalid email or password"));
+                    .body(new AuthResponse(null, null, null,  null, null,"Invalid email or password"));
         }
     }
 

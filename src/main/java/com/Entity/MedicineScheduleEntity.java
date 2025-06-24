@@ -44,9 +44,9 @@ public class MedicineScheduleEntity {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private UserEntity user;
+//    @ManyToOne
+//    @JoinColumn(name = "user_id", nullable = false)
+//    private UserEntity user;
 
     @OneToMany(mappedBy = "medicineSchedule", cascade = CascadeType.ALL)
     private List<DoseTimeEntity> doseTimes;

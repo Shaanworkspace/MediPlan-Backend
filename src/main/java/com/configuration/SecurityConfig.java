@@ -18,7 +18,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-
 import java.util.List;
 
 @Configuration
@@ -34,6 +33,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
                     config.setAllowedOrigins(List.of("http://localhost:5173","http://localhost:3000"));
+
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
                     config.setAllowCredentials(true);
@@ -41,7 +41,27 @@ public class SecurityConfig {
                 }))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
+                        .requestMatchers(
+                                "/api/auth/login",
+                                "/api/auth/register",
+                                "/health/hello",
+                                "/api/auth/all",
+
+                                // ✅ Make these public
+                                "/api/patients",
+                                "/api/doctors",
+                                "/api/appointments",
+                                "/api/insurance",
+                                "/api/medical-records",
+                                "/doctor/all",
+                                "/doctor/add-all",
+                                "/patient/all",
+                                "/patient/add-all",
+                                "/patient/bulk-update-roles",
+                                "/doctor/{id}",
+                                "/patient/**",
+                                "/appointment/create"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

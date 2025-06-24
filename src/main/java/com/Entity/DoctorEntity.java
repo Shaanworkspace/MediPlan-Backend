@@ -3,31 +3,34 @@ package com.Entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+@Data
 @Entity
 @Table(name = "doctors")
-@Data                   // Generates getters, setters, toString, equals, hashCode
-@NoArgsConstructor      // Generates a no-arg constructor
-@AllArgsConstructor     // Generates an all-arg constructor
-@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class DoctorEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
-    private String fullName;
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
 
     @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(nullable = false)
+    private String specialty;
+
+    @Column
     private String phoneNumber;
 
-    @Column(nullable = false)
-    private String specialization;
+    @Column
+    private String address;
 
-    private Integer experience; // in years
-
-    private String hospitalName;
-
-    private boolean available;  // availability status
+    @Column(name = "available", nullable = false, columnDefinition = "BIT DEFAULT 1")
+    private boolean available = true;
 }

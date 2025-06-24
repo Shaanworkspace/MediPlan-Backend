@@ -1,5 +1,7 @@
 package com.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -17,9 +19,7 @@ import java.util.stream.Collectors;
 
 @Entity
 @Data
-
 public class UserEntity implements UserDetails {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,7 +27,9 @@ public class UserEntity implements UserDetails {
     private String firstName;
     private String lastName;
 
-    @Email @NotNull @Column(unique = true)
+    @Email
+    @NotNull
+    @Column(unique = true)
     private String email;
 
     @NotNull
@@ -35,17 +37,25 @@ public class UserEntity implements UserDetails {
     private String passwordWithoutEncryption;
     private String phone;
     private String company;
+    private String gender;
+    private String address;
     private LocalDate dob;
 
     @CreationTimestamp
     @Column(name = "time", updatable = false)
     private LocalDateTime localDateTimeOfRegistration;
 
-    @OneToMany(mappedBy = "user")
-    private List<MedicineScheduleEntity> schedules;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JsonManagedReference
+    private List<AppointmentEntity> appointmentEntities;
 
-    @OneToMany(mappedBy = "user")
-    private List<MedicineStockEntity> stocks;
+    //    @OneToMany(mappedBy = "user")
+//    private List<MedicineScheduleEntity> schedules;
+//    @OneToMany(mappedBy = "user")
+//    private List<MedicineStockEntity> stocks;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JsonManagedReference
+    private List<UserRoles> roles;
 
     @Column(nullable = false)
     private boolean enabled = true;
@@ -59,10 +69,9 @@ public class UserEntity implements UserDetails {
     @Column(nullable = false)
     private boolean accountNonLocked = true;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER,orphanRemoval = true)
-    private List<UserRoles> roles;
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream()
                 .map(role -> new SimpleGrantedAuthority(role.getRole().name()))
@@ -73,6 +82,7 @@ public class UserEntity implements UserDetails {
     public String getUsername() {
         return email;
     }
+
     @Override
     public String getPassword() {
         return password;
@@ -97,6 +107,7 @@ public class UserEntity implements UserDetails {
     public boolean isEnabled() {
         return enabled;
     }
+
     @Override
     public String toString() {
         return "UserEntity{" +
@@ -104,4 +115,6 @@ public class UserEntity implements UserDetails {
                 // Avoid printing roles here if it causes recursion
                 '}';
     }
+
+
 }
