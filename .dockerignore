@@ -1,6 +1,7 @@
-target
-.idea
+target/
 *.iml
-.git
-.gitignore
+.idea/
+*.log
+*.md
+.DS_Store
 .env
