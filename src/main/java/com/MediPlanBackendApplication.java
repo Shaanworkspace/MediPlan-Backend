@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class MediPlanBackendApplication {
     public static void main(String[] args) {
         // Load .env file
-        Dotenv dotenv = Dotenv.load();
+        Dotenv dotenv = Dotenv.configure().load();
 
         // Set environment variables manually
         dotenv.entries().forEach(entry ->

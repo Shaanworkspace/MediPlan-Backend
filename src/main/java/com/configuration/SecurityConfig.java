@@ -3,6 +3,7 @@ package com.configuration;
 import com.Service.UserService;
 import com.filter.JwtFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,12 +28,14 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
     private final UserService userService;
 
+    @Value("${frontend.url}")
+    private String frontendUrl;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://localhost:5173","http://localhost:3000"));
+                    config.setAllowedOrigins(List.of(frontendUrl,"http://localhost:3000"));
 
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
