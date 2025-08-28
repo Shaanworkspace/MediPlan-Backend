@@ -19,36 +19,124 @@ There is a need for a digital solution that allows patients to plan, schedule, a
 
 ---
 
-# 📝 Case Study: MediPlan – A Digital Medication Reminder & Health Planner System
+## 📂 Entities and Attributes
 
-## Entities and Details
+### 1. **User (user_entity)**
+- **Attributes:** User_ID (PK), First_Name, Last_Name, DOB, Gender, Email, Phone, Password, Address, Company, Account_Status (enabled/locked), etc.  
+- **Role:** Represents all users in the system (patients, doctors, caregivers, admins).
 
-- **Patient** *(Patient_ID, Name, Age, Gender, Email/Phone, Address, Medical_History)*  
-- **Doctor** *(Doctor_ID, Name, Specialization, Contact_Info, Hospital/Clinic)*  
-- **Medicine** *(Med_ID, Name, Manufacturer, Strength, Stock_Quantity, Expiry_Date)*  
-- **Medical Plan** *(Plan_ID, Patient_ID, Med_ID, Dosage, Frequency, Start_Date, End_Date, Instructions)*  
-- **Reminder** *(Reminder_ID, Plan_ID, Time, Frequency_Type [Daily/Weekly/Monthly], Status [Taken/Skipped])*  
-- **Appointment** *(Appt_ID, Patient_ID, Doctor_ID, Date, Time, Purpose, Notes)*  
-- **Medical Report** *(Report_ID, Patient_ID, Doctor_ID, Report_Date, File/Notes, Next_Checkup)*  
+---
+### 2. **User_Roles (user_roles)**
+- **Attributes:** ID (PK), Role {ADMIN, CARE_GIVER, DOCTOR, PATIENT}, User_ID (FK).  
+- **Role:** Defines system roles of each user.
+
+---
+
+### 3. **Admin (admins)**
+- **Attributes:** Admin_ID (PK), Full_Name, Email, Phone, Department, Address_Details, Profile_Photo.  
+- **Role:** Special type of user with administration privileges.
+
+---
+
+### 4. **Doctor (doctors)**
+- **Attributes:** Doctor_ID (PK), First_Name, Last_Name, Email, Phone_Number, Specialty, Address, Availability.  
+- **Role:** Medical professionals who can view patient history, prescriptions, and appointments.
+
+---
+
+### 5. **Appointment (appointments)**
+- **Attributes:** Appointment_ID (PK), Appointment_Date_Time, Mode (Online/Offline), Reason, Doctor_Name, Doctor_Specialization, Payment_Mode, Insurance_Details, Consent, Notes, Created_At, Updated_At, User_ID (FK).  
+- **Role:** Represents patient appointments with doctors.
+
+---
+
+### 6. **Caregiver (caregiver_entity)**
+- **Attributes:** Caregiver_Entity_ID (PK), Caregiver_ID (FK → User), Patient_ID (FK → User), Allow_Auto_Purchase.  
+- **Role:** Assigns a caregiver to monitor patients’ medication and support needs.
+
+---
+
+### 7. **Medicine_Schedule (medicine_schedule_entity)**
+- **Attributes:** Schedule_ID (PK), Medicine_Name, Dosage_Amount, Dosage_Instruction, Frequency, Start_Date, End_Date, Reminder_Enabled, Created_At, Updated_At, Notes.  
+- **Role:** Tracks the plan of medicines a patient must follow.
+
+---
+
+### 8. **Dose_Times (dose_time_entity)**
+- **Attributes:** Dose_ID (PK), Dose_Time, Medicine_Schedule_ID (FK).  
+- **Role:** Defines times of day each medicine should be taken.
+
+---
+
+### 9. **Medicine_Schedule_Days (medicine_schedule_entity_days_of_week)**
+- **Attributes:** Schedule_ID (FK), Day_Of_Week [0–6].  
+- **Role:** Stores schedule repetition based on days of week.
+
+---
+
+### 10. **Medicine_Schedule_Extra_Times (medicine_schedule_entity_dose_take_time)**
+- **Attributes:** Schedule_ID (FK), Take_Time.  
+- **Role:** Additional dose-taking times.
+
+---
+
+### 11. **Medicine_Stock (medicine_stock_entity)**
+- **Attributes:** Stock_ID (PK), Medicine_Name, Current_Quantity, Low_Stock_Threshold, Auto_Buy, Last_Updated.  
+- **Role:** Tracks stock quantity and triggers alerts when stock is low.
+
+---
+
+### 12. **Reminder (reminder_entity)**
+- **Attributes:** Reminder_ID (PK), Reminder_Date_Time, Message, Is_Sent, Medicine_Schedule_ID (FK).  
+- **Role:** Notification entity that reminds patients based on schedule.
+
+---
+
+### 13. **Contacts (contacts)**
+- **Attributes:** Contact_ID (PK), Address, Phone, Email, LinkedIn, GitHub, HackerRank.  
+- **Role:** General contact table for storing extended contact details.
 
 ---
 
 ## 🔗 Relationships and Constraints
 
-- Each patient can have many medicines in their medical plan; each medicine may belong to many patients. (**M:N via Medical Plan**)  
-- Each medical plan generates scheduled reminders. (**1:N**)  
-- Each patient can book many appointments with doctors; each appointment is linked to exactly one doctor. (**M:N but resolved via Appointment entity**)  
-- Each doctor can access multiple patients’ history/medical reports; each report is prepared for exactly one patient. (**1:N**)  
-- Medicine stock must be monitored — when stock is below threshold, the patient is notified.  
+- **Users – Roles:**  
+  1:N (One user can have multiple roles like Doctor + Admin).  
+
+- **Users – Appointments:**  
+  1:N (Each patient can book many appointments, each appointment belongs to one patient).  
+
+- **Doctors – Appointments:**  
+  Doctors are referenced by name/specialty inside appointment. (Better modeled as a relationship).  
+
+- **Users – Caregiver:**  
+  - A patient can have multiple caregivers.  
+  - A caregiver can manage multiple patients.  
+  - Relationship is **M:N** resolved via `caregiver_entity`.  
+
+- **Patients – Medicine_Schedule:**  
+  1:N (One patient can have multiple medication schedules).  
+
+- **Medicine_Schedule – Dose_Times:**  
+  1:N (Each schedule has many daily dose times).  
+
+- **Medicine_Schedule – Days_Of_Week:**  
+  1:N (Each schedule can map to multiple days).  
+
+- **Medicine_Schedule – Stock:**  
+  1:1 or 1:N (Each medicine being scheduled must correspond to stock tracking).  
+
+- **Medicine_Schedule – Reminder:**  
+  1:N (Each schedule creates many reminders).  
 
 ---
 
-## ♾️ Participation & Cardinality
+## 📊 Participation & Cardinality
 
-- **Patient–Medical Plan**: Mandatory, since every patient may have at least one plan. A plan cannot exist without a patient.  
-- **Medical Plan–Reminder**: Total participation, since each plan yields reminders.  
-- **Doctor–Appointment–Patient**: Both Patients and Doctors participate; cardinality is many-to-many, resolved via *Appointment*.  
-- **Patient–Medical Report**: Optional, since patients may not always have uploaded/generated reports.  
+- **User → Appointment:** **Total** participation (appointment must belong to a user).  
+- **Caregiver → Patient:** **Partial**, since not all patients have caregivers.  
+- **Medicine_Schedule → Reminder:** **Total**, if reminders are enabled.  
+- **Medicine_Stock → Schedule:** **Mandatory**, since stock must exist for an active schedule.  
 
 ---
 
